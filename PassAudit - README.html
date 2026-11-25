@@ -1,0 +1,211 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name=claude:viewport-fit-sides content=cover><style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-right:env(safe-area-inset-right,0px);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}</style><style>.md-table{overflow-x:auto}@media print{.md-table{overflow-x:visible}}</style><style>:root{color-scheme:light dark;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}}:root[data-theme="dark"]{color-scheme:dark;--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}:root[data-theme="light"]{color-scheme:light}@media print{:root,:root[data-theme="dark"]{color-scheme:light;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}}body{background:var(--md-bg);color:var(--md-text);max-width:720px;margin:0 auto;padding:32px;display:flex;flex-direction:column;gap:10px;font:14px/1.55 -apple-system,BlinkMacSystemFont,'SF Pro','Segoe UI',sans-serif;overflow-wrap:break-word}body>:first-child{margin-top:0}h1,h2,h3,h4,h5,h6{margin:6px 0 0;line-height:1.25;font-weight:600;text-wrap:balance}h1{font-size:1.35em}h2{font-size:1.15em;color:var(--md-muted)}h3,h4,h5,h6{font-size:1em}p,ul,ol,blockquote,table,pre,hr{margin:0}strong{font-weight:600}a{color:var(--md-link);text-decoration:none}a:hover{text-decoration:underline}ul,ol{display:flex;flex-direction:column;gap:6px;padding-inline-start:22px}ul{list-style:disc}ol{list-style:decimal}li[dir]{text-align:start}:is(li,td,th)>*+:is(p,ul,ol,blockquote){margin-top:6px}blockquote{display:flex;flex-direction:column;gap:10px;border-inline-start:2px solid var(--md-rule);padding-inline-start:10px;color:var(--md-muted)}:not(pre)>code{background:var(--md-fill);padding:1px 3px;border-radius:4px;font:.92em 'SF Mono',ui-monospace,Menlo,Consolas,monospace}a>code{background:none;color:inherit}pre{background:var(--md-fill);padding:10px 12px;border-radius:6px;overflow-x:auto;font:12px/1.5 'SF Mono',ui-monospace,Menlo,Consolas,monospace;margin-block:4px}pre code{background:none;padding:0;font:inherit}[dir=rtl] pre{direction:ltr;text-align:left}[dir=rtl] code{direction:ltr;unicode-bidi:isolate}table{width:100%;border-collapse:separate;border-spacing:2px;font:inherit}th,td{padding:6px 8px;border-radius:3px;text-align:start;vertical-align:top}th{background:var(--md-fill-strong);font-weight:600}td{background:var(--md-fill)}:is(th,td) :not(pre)>code{background:transparent}hr{border:0;border-top:1px solid var(--md-rule-strong);margin-block:10px}img{max-width:100%;height:auto;border-radius:4px}</style>
+</head><body>
+<h1>PassAudit</h1>
+<p>A read-only <strong>password policy auditor</strong> for Windows, written in Python.
+It collects the local password policy (and, in a lab domain, the domain password policy),
+compares every setting with a written baseline, and prints a graded <strong>PASS / WARN / FAIL</strong>
+report with a risk explanation for each weak setting.</p>
+<blockquote>
+<p><strong>Lab use only.</strong> Run PassAudit only on systems you own or have written permission to
+examine. It only <em>reads</em> policy settings; it never changes a password, a policy or an
+account. Unauthorized access to computer systems is a criminal offence under the
+Prevention of Electronic Crimes Act, 2016 (Pakistan).</p>
+</blockquote>
+<h2>What it checks</h2>
+<div class="md-table" role="group" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Source of the value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Minimum password length</td>
+<td><code>net accounts</code> / LDAP <code>minPwdLength</code></td>
+</tr>
+<tr>
+<td>Password complexity</td>
+<td><code>secedit /export</code> / LDAP <code>pwdProperties</code> (bit 1)</td>
+</tr>
+<tr>
+<td>Maximum password age</td>
+<td><code>net accounts</code> / LDAP <code>maxPwdAge</code></td>
+</tr>
+<tr>
+<td>Minimum password age</td>
+<td><code>net accounts</code> / LDAP <code>minPwdAge</code></td>
+</tr>
+<tr>
+<td>Password history length</td>
+<td><code>secedit /export</code> / LDAP <code>pwdHistoryLength</code></td>
+</tr>
+<tr>
+<td>Account lockout threshold</td>
+<td><code>net accounts</code> / LDAP <code>lockoutThreshold</code></td>
+</tr>
+<tr>
+<td>Account lockout duration</td>
+<td><code>net accounts</code> / LDAP <code>lockoutDuration</code></td>
+</tr>
+<tr>
+<td>Lockout observation window</td>
+<td><code>net accounts</code> / LDAP <code>lockOutObservationWindow</code></td>
+</tr>
+<tr>
+<td>Reversible encryption</td>
+<td><code>secedit /export</code> / LDAP <code>pwdProperties</code> (bit 16)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>A setting that cannot be read is graded <strong>FAIL</strong> (it cannot be treated as safe).</p>
+<h2>Baseline</h2>
+<div class="md-table" role="group" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>PASS</th>
+<th>WARN</th>
+<th>FAIL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Minimum password length</td>
+<td>&gt;= 14</td>
+<td>8-13</td>
+<td>&lt; 8</td>
+</tr>
+<tr>
+<td>Complexity</td>
+<td>Enabled</td>
+<td>-</td>
+<td>Disabled</td>
+</tr>
+<tr>
+<td>Maximum password age</td>
+<td>1-365 days</td>
+<td>366-730 days</td>
+<td>Never expires, or &gt; 730</td>
+</tr>
+<tr>
+<td>Minimum password age</td>
+<td>&gt;= 1 day</td>
+<td>-</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Password history</td>
+<td>&gt;= 24</td>
+<td>10-23</td>
+<td>&lt; 10</td>
+</tr>
+<tr>
+<td>Lockout threshold</td>
+<td>1-5 attempts</td>
+<td>6-10</td>
+<td>0 (never locks) or &gt; 10</td>
+</tr>
+<tr>
+<td>Lockout duration</td>
+<td>&gt;= 15 min</td>
+<td>5-14</td>
+<td>&lt; 5</td>
+</tr>
+<tr>
+<td>Lockout observation window</td>
+<td>&gt;= 15 min</td>
+<td>5-14</td>
+<td>&lt; 5</td>
+</tr>
+<tr>
+<td>Reversible encryption</td>
+<td>Disabled</td>
+<td>-</td>
+<td>Enabled</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Where the values come from:</strong> the CIS Microsoft Windows Benchmarks (Account Policies
+section) and Microsoft security guidance. The PASS column follows the CIS recommended
+values; the WARN bands are my own &quot;close but short&quot; ranges.
+The exact value for each check is encoded in <a href="baseline.py"><code>baseline.py</code></a>, together with
+its source and risk text.</p>
+<p>Notes on the baseline:</p>
+<ul>
+<li>Maximum password age follows CIS (365 days or fewer, not 0). Microsoft's newer security
+baselines and NIST SP 800-63B no longer recommend forced periodic expiry, so treat this
+check as a CIS-driven requirement, not a universal one.</li>
+<li>When the lockout threshold is 0, lockout duration and window are not enforced in practice.</li>
+</ul>
+<h2>Install</h2>
+<p>Python 3.8+ on Windows. Local mode uses only the standard library.
+Domain mode needs <code>ldap3</code>:</p>
+<pre><code>pip install -r requirements.txt
+</code></pre>
+<h2>Run</h2>
+<p>Open an <strong>elevated</strong> (Administrator) prompt, because <code>secedit /export</code> needs it.</p>
+<pre><code>:: local policy only
+python passaudit.py --mode local
+
+:: local policy + lab domain policy over LDAP
+python passaudit.py --mode domain --server dc01.lab.local --base-dn &#34;DC=lab,DC=local&#34; --user &#34;LAB\student&#34;
+
+:: choose the report name (the audit date is added automatically)
+python passaudit.py --mode local --output reports\vm_audit.txt
+</code></pre>
+<ul>
+<li>The LDAP password is asked at the prompt (or set <code>PASSAUDIT_LDAP_PASSWORD</code>). It is never a command-line flag.</li>
+<li>Use <code>--ssl</code> for LDAPS.</li>
+<li>Reports are saved as <code>name_YYYYMMDD_HHMMSS.txt</code>. An earlier report is never overwritten.</li>
+<li>Exit code <code>0</code> = no failures, <code>1</code> = at least one FAIL.</li>
+</ul>
+<p>Limitations: <code>net accounts</code> parsing expects English Windows output.</p>
+<h2>Project layout</h2>
+<div class="md-table" role="group" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>Job</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>passaudit.py</code></td>
+<td>command-line entry point</td>
+</tr>
+<tr>
+<td><code>collectors.py</code></td>
+<td><code>net accounts</code>, <code>secedit</code> and LDAP readers (read-only)</td>
+</tr>
+<tr>
+<td><code>baseline.py</code></td>
+<td>the baseline data: values, risks, sources</td>
+</tr>
+<tr>
+<td><code>grader.py</code></td>
+<td>PASS / WARN / FAIL logic</td>
+</tr>
+<tr>
+<td><code>report.py</code></td>
+<td>report text, summary, safe saving</td>
+</tr>
+<tr>
+<td><code>tests/</code></td>
+<td>unit tests (no Windows needed)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2>Tests</h2>
+<pre><code>python -m unittest discover -s tests -v
+</code></pre>
+<p>The grader is tested with a strong, a borderline and a weak policy record; the parsers
+are tested with sample <code>net accounts</code>, <code>secedit</code> and LDAP data.</p>
+<h2>Sample report</h2>
+<p>See <a href="sample_report.txt"><code>sample_report.txt</code></a> and the write-up of one failed check in
+<a href="docs/failed_check_writeup.md"><code>docs/failed_check_writeup.md</code></a>.</p>
+
+</body></html>
